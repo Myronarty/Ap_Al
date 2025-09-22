@@ -149,9 +149,9 @@ class GraphMat
 {
 protected:
 	int *a; //масив для матриці
-	int *b; //масив імен вершин
 	int n; //кількість вершин
 public:
+	int* b; //масив імен вершин
 	GraphMat()
 	{
 		a = { 0 };
@@ -171,10 +171,6 @@ public:
 		{
 			b[i] = i+1;
 		}
-	}
-	GraphMat GraphMatList(GraphMat A) //перетворення у списки
-	{
-		// ???
 	}
 	GraphMat(const GraphMat&) = default;
 	GraphMat(GraphMat&&) = default;
@@ -237,12 +233,12 @@ public:
 	}
 	void AdE(int v, int u) //додати ребро
 	{
+		v = getIndex(b, n, v);
+		u = getIndex(b, n, u);
 		if (v > n || u > n || v == u)
 		{
 			return;
 		}
-		v = getIndex(b, n, v);
-		u = getIndex(b, n, u);
 		a[v*n + u] = 1;
 		a[u * n +v] = 1;
 	}
@@ -306,8 +302,6 @@ public:
 		a[v * n + u] = 0;
 		a[u * n + v] = 0;
 	}
-
-
 
 	int getIndex(int* w, int size, int v_n) //назва вершини != її індексу
 	{
@@ -402,6 +396,27 @@ public:
 		it_u->push_back(v);
 	}
 
+	GraphMat Convert_(GraphList G)
+	{
+		int m = G.GetSize(G);
+		GraphMat H(m);
+		for (int i = 0; i < m; i++)
+		{
+			H.b[i] = G.Get_Name(G, i);
+		}
+		for (int i = 0; i < m; i++)
+		{
+			int v = G.Get_Name(G, i);
+			list<int> neighbors = G.GetNeighbors(i);
+
+			for (int u : neighbors)
+			{
+					H.AdE(v, u);
+			}
+		}
+		return H;
+	}
+
 	void ShowList()
 	{
 		if (n == 0)
@@ -476,7 +491,6 @@ public:
 		advance(it, i);
 		return *it;
 	}
-
 };
 
 class OrGraphMat : public GraphMat //нащадок неорієнтованого графа - орієнтований
@@ -485,12 +499,12 @@ public:
 	using GraphMat::GraphMat;
 	void AdE(int v, int u)
 	{
-		if (v > n || u > n)
+		v = getIndex(b, n, v);
+		u = getIndex(b, n, u);
+		if (v == -1 || u == -1)
 		{
 			return;
 		}
-		v = getIndex(b, n, v);
-		u = getIndex(b, n, u);
 		a[v * n + u] = 1;
 	}
 	void DelE(int v, int u)
@@ -511,12 +525,12 @@ public:
 	using GraphMat::GraphMat;
 	void AdE(int v, int u, int w)
 	{
-		if (v > n || u > n)
+		v = getIndex(b, n, v);
+		u = getIndex(b, n, u);
+		if (v == -1 || u == -1)
 		{
 			return;
 		}
-		v = getIndex(b, n, v);
-		u = getIndex(b, n, u);
 		a[v * n + u] = w;
 		a[u * n + v] = w;
 	}
@@ -528,12 +542,12 @@ public:
 	using OrGraphMat::OrGraphMat;
 	void AdE(int v, int u, int w)
 	{
-		if (v > n || u > n)
+		v = getIndex(b, n, v);
+		u = getIndex(b, n, u);
+		if (v == -1 || u == -1)
 		{
 			return;
 		}
-		v = getIndex(b, n, v);
-		u = getIndex(b, n, u);
 		a[v * n + u] = w;
 	}
 };
@@ -563,6 +577,11 @@ int main()
 
 	GraphList H = H.Convert(G);
 	H.ShowList();
+	GraphMat A = H.Convert_(H);
+	A.ShowM(A);
+
+	A.AdE(1, 6);
+	A.ShowM(A);
 
 	return 0;
 }
