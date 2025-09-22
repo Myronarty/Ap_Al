@@ -4,6 +4,8 @@
 #include <random>
 #include <chrono>
 #include <random>
+#include <list>
+
 
 using namespace std;
 using namespace std::chrono;
@@ -143,20 +145,20 @@ public:
 	}
 };
 
-class Graph
+class GraphMat
 {
 protected:
 	int *a; //масив для матриці
-	int* b; //масив імен вершині
+	int *b; //масив імен вершин
 	int n; //кількість вершин
 public:
-	Graph()
+	GraphMat()
 	{
 		a = { 0 };
 		b = { 0 };
 		n = 0;
 	}
-	Graph(int s)
+	GraphMat(int s)
 	{
 		n = s;
 		a = new int[n*n];
@@ -170,14 +172,14 @@ public:
 			b[i] = i+1;
 		}
 	}
-	Graph GraphS(Graph A)
+	GraphMat GraphMatList(GraphMat A) //перетворення у списки
 	{
 		// ???
 	}
-	Graph(const Graph&) = default;
-	Graph(Graph&&) = default;
-	Graph& operator=(const Graph&) = default;
-	void ShowM(Graph H)
+	GraphMat(const GraphMat&) = default;
+	GraphMat(GraphMat&&) = default;
+	GraphMat& operator=(const GraphMat&) = default;
+	void ShowM(GraphMat H) //візуалізація матриці
 	{
 		if (H.n != 0) 
 		{
@@ -204,11 +206,11 @@ public:
 		}
 		else
 		{
-			cout << "Graph is empty" << endl;
+			cout << "GraphMat is empty" << endl;
 			return;
 		}
 	}
-	void AdV()
+	void AdV() //додати вершину
 	{
 		int* temp = new int[(n + 1) * (n + 1)] {0};
 		for (int i = 0; i < n; i++)
@@ -233,9 +235,9 @@ public:
 		b = temp_;
 		n++;
 	}
-	void AdE(int v, int u)
+	void AdE(int v, int u) //додати ребро
 	{
-		if (v > n || u > n)
+		if (v > n || u > n || v == u)
 		{
 			return;
 		}
@@ -244,7 +246,7 @@ public:
 		a[v*n + u] = 1;
 		a[u * n +v] = 1;
 	}
-	void DelV(int k)
+	void DelV(int k) //видалити вершину за номером
 	{
 		if (k > n || k < 1)
 		{
@@ -293,7 +295,7 @@ public:
 		b = temp_;
 		n--;
 	}
-	void DelE(int v, int u)
+	void DelE(int v, int u) // видалити ребро
 	{
 		if (v > n || u > n)
 		{
@@ -306,7 +308,8 @@ public:
 	}
 
 
-	int getIndex(int* w, int size, int v_n)
+
+	int getIndex(int* w, int size, int v_n) //назва вершини != її індексу
 	{
 		for (int i = 0; i < size; i++)
 		{
@@ -318,9 +321,24 @@ public:
 		return -1;
 	}
 
-	Graph RG(int t, double c)
+	int GetSize(GraphMat G)
 	{
-		Graph G(t);
+		return G.n;
+	}
+
+	int Get_i_j(GraphMat G, int i, int j)
+	{
+		return G.a[i * G.n + j];
+	}
+
+	int Get_Name(GraphMat G, int i)
+	{
+		return G.b[i];
+	}
+
+	GraphMat RG(int t, double c) //випадковий граф Ердеша-Регьї (сподіваюсь)
+	{
+		GraphMat G(t);
 		double p = c * log(t)/t;
 		random_device rd;
 		mt19937 gen(rd());
@@ -340,10 +358,131 @@ public:
 	}
 };
 
-class OrGraph : public Graph //нащадок неорієнтованого графа - орієнтований
+class GraphList
+{
+private:
+	list <list <int>> listochok; //списки
+	int* a; //назви вершин
+	int n;
+public:
+	GraphList()
+	{
+		a = { 0 };
+		n = 0;
+	}
+	GraphList(int s)
+	{
+		n = s;
+		a = new int[n];
+		for (int i = 0; i < n; i++) 
+		{
+			a[i] = i + 1;
+			listochok.push_back(list<int>());
+		}
+	}
+	void AdV()
+	{
+		list <int> a;
+		listochok.push_back(a);
+		n++;
+	}
+	void AdE(int v, int u)
+	{
+		v = getIndex(a, n, v);
+		u = getIndex(a, n, u);
+
+		if (v == -1 || u == -1) return;
+
+		auto it_v = listochok.begin();
+		advance(it_v, v);
+		it_v->push_back(u);
+
+		auto it_u = listochok.begin();
+		advance(it_u, u);
+		it_u->push_back(v);
+	}
+
+	void ShowList()
+	{
+		if (n == 0)
+		{
+			cout << "GraphList is empty" << endl;
+			return;
+		}
+
+		for (int i = 0; i < n; i++)
+		{
+			cout << "v_" << a[i] << " -> ";
+
+			auto it = listochok.begin();
+			advance(it, i);
+
+			for (int v : *it)
+			{
+				cout << "v_" << v << " ";
+			}
+			cout << endl;
+		}
+	}
+
+	GraphList Convert(GraphMat G)
+	{
+		int m = G.GetSize(G);
+		GraphList H(m);
+		for (int i = 0; i < H.n; i++)
+		{
+			H.a[i] = G.Get_Name(G, i);
+		}
+		for (int i = 0; i < H.n; i++)
+		{
+			for (int j = 0; j < H.n; j++)
+			{
+				if (G.Get_i_j(G, i, j) == 1)
+				{
+					auto it = H.listochok.begin();
+					advance(it, i);
+					it->push_back(H.a[j]);
+				}
+			}
+		}
+		return H;
+	}
+
+	int getIndex(int* w, int size, int v_n)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			if (w[i] == v_n)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	int GetSize(GraphList G)
+	{
+		return G.n;
+	}
+
+	int Get_Name(GraphList G, int i)
+	{
+		return G.a[i];
+	}
+
+	list<int> GetNeighbors(int i)
+	{
+		auto it = listochok.begin();
+		advance(it, i);
+		return *it;
+	}
+
+};
+
+class OrGraphMat : public GraphMat //нащадок неорієнтованого графа - орієнтований
 {
 public:
-	using Graph::Graph;
+	using GraphMat::GraphMat;
 	void AdE(int v, int u)
 	{
 		if (v > n || u > n)
@@ -366,10 +505,10 @@ public:
 	}
 };
 
-class WGraph : public Graph //нащадок неорієнтованого графа - зважений
+class WGraphMat : public GraphMat //нащадок неорієнтованого графа - зважений
 {
 public:
-	using Graph::Graph;
+	using GraphMat::GraphMat;
 	void AdE(int v, int u, int w)
 	{
 		if (v > n || u > n)
@@ -383,10 +522,10 @@ public:
 	}
 };
 
-class WOrGraph : public OrGraph //нащадок орієнтованого графа - зважений, просто щоб було
+class WOrGraphMat : public OrGraphMat //нащадок орієнтованого графа - зважений, просто щоб було
 {
 public:
-	using OrGraph::OrGraph;
+	using OrGraphMat::OrGraphMat;
 	void AdE(int v, int u, int w)
 	{
 		if (v > n || u > n)
@@ -401,8 +540,29 @@ public:
 
 int main()
 {
-	Graph G = G.RG(9, 1);
+	GraphMat G(3);
 	G.ShowM(G);
+	G.AdE(2, 3);
+	G.ShowM(G);
+	G.AdE(2, 1);
+	G.ShowM(G);
+	G.AdV();
+	G.AdV();
+	G.AdV();
+	G.AdE(3, 4);
+	G.AdE(4, 1);
+	G.AdE(2, 4);
+	G.AdE(6, 5);
+	G.AdE(2, 5);
+	G.AdE(6, 1);
+	G.ShowM(G);
+	G.DelV(3);
+	G.ShowM(G);
+	G.DelV(5);
+	G.ShowM(G);
+
+	GraphList H = H.Convert(G);
+	H.ShowList();
 
 	return 0;
 }
