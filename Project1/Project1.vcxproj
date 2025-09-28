@@ -128,7 +128,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Sourse.cpp" />
+    <ClCompile Include="GraphList.cpp" />
+    <ClCompile Include="GraphsMat.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Set.cpp" />
+    <ClCompile Include="W_Or_Graphs.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GraphList.h" />
+    <ClInclude Include="GraphMat.h" />
+    <ClInclude Include="Set.h" />
+    <ClInclude Include="W_Or_Graphs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
