@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <list>
+#include <utility>
+#include <vector>
 #include "GraphMat.h"
 
 using namespace std;
@@ -15,13 +17,38 @@ private:
 public:
 	GraphList();
 	GraphList(int s);
+	GraphList(const GraphList&);
+	GraphList(GraphList&&);
+	GraphList& operator=(const GraphList&);
 	void AdV();
 	void AdE(int v, int u);
 	GraphMat Convert_(GraphList G);
 	void ShowList();
 	GraphList Convert(GraphMat G);
-	int getIndex(int* w, int size, int v_n);
+	int getIndex(int v_n);
 	int GetSize(GraphList G);
 	int Get_Name(GraphList G, int i);
 	list<int> GetNeighbors(int i);
+};
+
+class WGraphList : public GraphList //нащадок неорієнтованого графа - зважений
+{
+protected:
+	vector <list <pair<int, int>>> listochok; //списки: вершина та вага шляху до неї
+	int* a; //назви вершин
+	int n;
+public:
+	using GraphList::GraphList;
+	WGraphList();
+	WGraphList(const WGraphList&);
+	WGraphList(WGraphList&&);
+	WGraphList& operator=(const WGraphList&);
+	int getIndex(int v_n);
+	void AdV();
+	void AdE(int v, int u, int w);
+	void DelV(int v);
+	void DelE(int v, int u);
+	void ShowList();
+
+	int* Dijkstra(WGraphList G);
 };

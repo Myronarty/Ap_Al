@@ -2,7 +2,7 @@
 
 GraphList::GraphList()
 {
-	a = { 0 };
+	a = nullptr;
 	n = 0;
 }
 
@@ -17,17 +17,31 @@ GraphList::GraphList(int s)
 	}
 }
 
+GraphList::GraphList(const GraphList&) = default;
+
+GraphList::GraphList(GraphList&&) = default;
+
+GraphList& GraphList:: operator=(const GraphList&) = default;
+
 void GraphList::AdV()
 {
-	list <int> a;
-	listochok.push_back(a);
+	listochok.push_back(list<int>());
+	int* temp_ = new int[n + 1];
+	for (int i = 0; i < n; i++)
+	{
+		temp_[i] = a[i];
+	}
+	temp_[n] = n + 1;
+	delete[] a;
+	a = temp_;
 	n++;
+	cout << n << endl;
 }
 
 void GraphList::AdE(int v, int u)
 {
-	v = getIndex(a, n, v);
-	u = getIndex(a, n, u);
+	v = getIndex(v);
+	u = getIndex(u);
 
 	if (v == -1 || u == -1) return;
 
@@ -108,11 +122,11 @@ GraphList GraphList::Convert(GraphMat G)
 	return H;
 }
 
-int GraphList::getIndex(int* w, int size, int v_n)
+int GraphList::getIndex(int v_n)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < n; i++)
 	{
-		if (w[i] == v_n)
+		if (a[i] == v_n)
 		{
 			return i;
 		}
@@ -135,4 +149,155 @@ list<int> GraphList::GetNeighbors(int i)
 	auto it = listochok.begin();
 	advance(it, i);
 	return *it;
+}
+
+WGraphList::WGraphList(const WGraphList&) = default;
+
+WGraphList::WGraphList(WGraphList&&) = default;
+
+WGraphList& WGraphList:: operator=(const WGraphList&) = default;
+
+WGraphList::WGraphList() : a(nullptr), n(0) {}
+
+int WGraphList::getIndex(int v_n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		if (a[i] == v_n)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+void WGraphList::AdV()
+{
+	listochok.push_back(list<pair<int, int>>());
+	int* temp_ = new int[n + 1];
+	for (int i = 0; i < n; i++)
+	{
+		temp_[i] = a[i];
+	}
+	if(n != 0)
+	{
+		temp_[n] = temp_[n - 1] + 1;
+	}
+	else
+	{
+		temp_[n] = 1;
+	}
+	delete[] a;
+	a = temp_;
+	n++;
+	cout << n << endl;
+}
+
+void WGraphList::AdE(int v, int u, int w)
+{
+	int index_v = getIndex(v);
+	int index_u = getIndex(u);
+
+	if (index_v == -1 || index_u == -1) 
+	{
+		cout << -1 << endl;
+		return;
+	}
+
+	listochok[index_v].push_back({ index_u, w });
+	listochok[index_u].push_back({ index_v, w });
+}
+
+void WGraphList::ShowList()
+{
+	if (n == 0)
+	{
+		cout << "WGraphList is empty" << endl;
+		return;
+	}
+
+	for (int i = 0; i < n; i++)
+	{
+		cout << "v_" << a[i] << ": ";
+
+		for (pair<int, int> v : listochok[i])
+		{
+			cout << "(v_" << a[v.first] << ", " << v.second << ") ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}
+
+void WGraphList::DelV(int v) {
+	int index_v = getIndex(v);
+
+	if (index_v == -1) {
+		cout << "Помилка: вершина для видалення не існує." << endl;
+		return;
+	}
+
+	listochok.erase(listochok.begin() + index_v);
+
+	int* temp_a = new int[n - 1];
+	for (int i = 0, j = 0; i < n; i++) 
+	{
+		if (i != index_v) 
+		{
+			temp_a[j++] = a[i];
+		}
+	}
+	delete[] a;
+	a = temp_a;
+
+	n--;
+
+	for (int i = 0; i < n; i++) 
+	{
+		for (auto it = listochok[i].begin(); it != listochok[i].end(); ) 
+		{
+			if (it->first == index_v) 
+			{
+				it = listochok[i].erase(it);
+			}
+			else 
+			{
+				if (it->first > index_v) 
+				{
+					it->first--;
+				}
+				++it;
+			}
+		}
+	}
+
+	cout << "v_" << v << " deleated." << endl;
+}
+
+void WGraphList::DelE(int v, int u) {
+	int index_v = getIndex(v);
+	int index_u = getIndex(u);
+
+	if (index_v == -1 || index_u == -1) {
+		cout << "v or u don't exist." << endl;
+		return;
+	}
+
+	for (auto it = listochok[index_v].begin(); it != listochok[index_v].end(); ++it) {
+		if (it->first == index_u) {
+			listochok[index_v].erase(it);
+			break;
+		}
+	}
+
+	for (auto it = listochok[index_u].begin(); it != listochok[index_u].end(); ++it) 
+	{
+		if (it->first == index_v) 
+		{
+			listochok[index_u].erase(it);
+			break;
+		}
+	}
+
+	cout << "Edges (" << v << ", " << u << ") deleated." << endl;
 }
