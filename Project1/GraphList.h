@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include "GraphMat.h"
+#include "W_Or_Graphs.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -40,6 +41,7 @@ protected:
 public:
 	using GraphList::GraphList;
 	WGraphList();
+	WGraphList(int s);
 	WGraphList(const WGraphList&);
 	WGraphList(WGraphList&&);
 	WGraphList& operator=(const WGraphList&);
@@ -49,6 +51,8 @@ public:
 	void DelV(int v);
 	void DelE(int v, int u);
 	void ShowList();
+	WGraphList Convert(WGraphMat G);
 
-	int* Dijkstra(WGraphList G);
+	pair<int, int>* Dijkstra(int s);
+	int* BF(int s);
 };

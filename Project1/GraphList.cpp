@@ -159,6 +159,17 @@ WGraphList& WGraphList:: operator=(const WGraphList&) = default;
 
 WGraphList::WGraphList() : a(nullptr), n(0) {}
 
+WGraphList::WGraphList(int s)
+{
+	n = s;
+	a = new int[n];
+	for (int i = 0; i < n; i++)
+	{
+		a[i] = i + 1;
+		listochok.push_back(list <pair<int, int>>());
+	}
+}
+
 int WGraphList::getIndex(int v_n)
 {
 	for (int i = 0; i < n; i++)
@@ -233,7 +244,7 @@ void WGraphList::DelV(int v) {
 	int index_v = getIndex(v);
 
 	if (index_v == -1) {
-		cout << "Помилка: вершина для видалення не існує." << endl;
+		cout << "V doesn't exist." << endl;
 		return;
 	}
 
@@ -242,7 +253,7 @@ void WGraphList::DelV(int v) {
 	int* temp_a = new int[n - 1];
 	for (int i = 0, j = 0; i < n; i++) 
 	{
-		if (i != index_v) 
+		if (i != index_v)
 		{
 			temp_a[j++] = a[i];
 		}
@@ -300,4 +311,35 @@ void WGraphList::DelE(int v, int u) {
 	}
 
 	cout << "Edges (" << v << ", " << u << ") deleated." << endl;
+}
+
+WGraphList WGraphList::Convert(WGraphMat G)
+{
+	// Отримуємо розмір графа G, який ми конвертуємо
+	int m = G.GetSize(G);
+
+	// Створюємо новий граф H правильного розміру
+	WGraphList H(m);
+
+	// Копіюємо імена вершин
+	for (int i = 0; i < m; i++)
+	{
+		H.a[i] = G.Get_Name(G, i);
+	}
+
+	// Копіюємо ребра, використовуючи правильний розмір 'm'
+	for (int i = 0; i < m; i++) // ВИПРАВЛЕНО: n -> m
+	{
+		for (int j = 0; j < m; j++) // ВИПРАВЛЕНО: n -> m
+		{
+			int w = G.Get_i_j(G, i, j);
+
+			if (w > 0)
+			{
+				// Додаємо ребро до списку суміжності графа H
+				H.listochok[i].push_back({ j, w });
+			}
+		}
+	}
+	return H;
 }
