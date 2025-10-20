@@ -7,32 +7,36 @@ using Clock = std::chrono::steady_clock;
 using std::chrono::microseconds;
 using std::chrono::duration_cast;
 
-int main() {
-    const int num_experiments = 1000;
+int main() 
+{
     long long total_duration_us = 0;
-    int a[5] = {15, 50, 100, 200, 500};
+    int a[5] = { 15, 50, 100, 200, 500 };
     double b[5] = { 0 };
 
-    for (int j = 0; j < 5; j++)
+    for (int i = 0; i < 5; i++)
     {
-        for (int i = 0; i < num_experiments; ++i)
-        {
-            WGraphMat G = G.RG(a[j], 0.9);
-            WGraphList H = H.Convert(G);
-            auto start_time = Clock::now();
+            for (int exp = 0; exp < 100; exp++)
+            {
+                WGraphMat G = G.RG(a[i], 1);
+                WGraphList H = H.Convert(G);
+                vector<Edge> E = H.Sort();
+                auto start_time = Clock::now();
 
-            H.BF(1);
+                H.Kruskal(E);
 
-            auto end_time = Clock::now();
+                auto end_time = Clock::now();
 
-            total_duration_us += duration_cast<microseconds>(end_time - start_time).count();
-        }
-        b[j] = static_cast<double>(total_duration_us) / num_experiments;
-        cout << j <<"st iteration over" << endl;
+                total_duration_us += duration_cast<milliseconds>(end_time - start_time).count();
+            }
+            b[i] = static_cast<double>(total_duration_us) / 100;
+            cout << i << "st iteration over" << endl;
+            total_duration_us = 0;
     }
-    for (int j = 0; j < 5; j++)
+
+    for (int i = 0; i < 5; i++)
     {
-        cout << "Average execution time: " << b[j] << " microseconds for BF on Graph with |V| = " << a[j] << endl;
+        cout << "Average execution time: " << b[i] << " milliseconds for Kruskal on Graph with |V| = " << a[i] << endl;
+        cout << endl;
     }
 
     return 0;

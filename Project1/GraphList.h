@@ -1,13 +1,19 @@
 #pragma once
 #include <iostream>
 #include <list>
-#include <utility>
 #include <vector>
+#include <algorithm>
 #include "GraphMat.h"
 #include "W_Or_Graphs.h"
+#include "UnionFind.h"
 
 using namespace std;
 using namespace std::chrono;
+
+struct Edge 
+{
+	int u, v, weight;
+};
 
 class GraphList
 {
@@ -55,4 +61,7 @@ public:
 
 	pair<int, int>* Dijkstra(int s);
 	int* BF(int s);
+	vector<Edge> Kruskal(const vector<Edge>& E);
+
+	vector<Edge> Sort();
 };

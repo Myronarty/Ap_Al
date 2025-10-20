@@ -1,6 +1,10 @@
 #include "GraphList.h"
 #include <limits> // for std::numeric_limits<int>::max()
 
+bool comparees(const Edge& a, const Edge& b) 
+{
+	return a.weight < b.weight;
+}
 
 pair<int, int>* WGraphList::Dijkstra(int s)
 {
@@ -55,7 +59,6 @@ int* WGraphList::BF(int s)
 	{
 		for (int verhunki = 0; verhunki < n; verhunki++)
 		{
-
 			for (pair<int, int> v : listochok[verhunki])
 			{
 				if (A[verhunki] == std::numeric_limits<int>::max())
@@ -70,4 +73,47 @@ int* WGraphList::BF(int s)
 		}
 	}
 	return A;
+}
+
+vector<Edge> WGraphList::Sort()
+{
+	vector<Edge> E;
+	for (int u = 0; u < this->n; ++u)
+	{
+		for (const auto& e_pair : this->listochok[u])
+		{
+			int v = e_pair.first;
+			int weight = e_pair.second;
+
+			if (u < v)
+			{
+				E.push_back({ u, v, weight });
+			}
+		}
+	}
+	sort(E.begin(), E.end(), comparees);
+	return E;
+}
+
+vector<Edge> WGraphList::Kruskal(const vector<Edge>& E)
+{
+	UnionFind UF(this->n);
+	vector<Edge> T;
+
+
+	for (const auto& e : E)
+	{
+		if (UF.Find(e.u) != UF.Find(e.v)) 
+		{
+			T.push_back(e);
+			UF.Union(e.u, e.v);
+		}
+
+		if (T.size() == this->n - 1)
+		{
+			break;
+		}
+	}
+
+	return T;
 }

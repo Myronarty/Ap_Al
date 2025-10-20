@@ -37,10 +37,10 @@ void WGraphMat::AdE(int v, int u, int w)
 WGraphMat WGraphMat::RG(int t, double c)
 {
 	WGraphMat G(t);
-	double p = c * log(t) / t;
+	//double p = c * log(t) / t;
 	random_device rd;
 	mt19937 gen(rd());
-	bernoulli_distribution d(p);
+	bernoulli_distribution d(c);
 
 	for (int i = 0; i < t; i++)
 	{
