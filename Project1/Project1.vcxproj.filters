@@ -36,6 +36,9 @@
     <ClCompile Include="UnionFind.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LUP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Set.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UnionFind.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LUP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
