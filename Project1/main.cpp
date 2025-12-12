@@ -9,41 +9,49 @@ using Clock = std::chrono::steady_clock;
 using std::chrono::microseconds;
 using std::chrono::duration_cast;
 
-int main() 
-{
-    long long total_duration_us = 0;
-    int a[5] = { 15, 50, 100, 200, 500 };
-    double b[5] = { 0 };
+void runTest(int n) {
+    std::cout << "Generating array of size " << n << "..." << std::endl;
 
-    for (int i = 0; i < 5; i++)
-    {
-            for (int exp = 0; exp < 100; exp++)
-            {
-                WGraphMat G = G.RG(a[i], 1);
-                WGraphList H = H.Convert(G);
-                vector<Edge> E = H.Sort();
-                auto start_time = Clock::now();
+    // Генеруємо масив
+    int* arr = new int[n];
 
-                H.Kruskal(E);
-
-                auto end_time = Clock::now();
-
-                total_duration_us += duration_cast<milliseconds>(end_time - start_time).count();
-            }
-            b[i] = static_cast<double>(total_duration_us) / 100;
-            cout << i << "st iteration over" << endl;
-            total_duration_us = 0;
+    // Заповнюємо випадковими числами
+    // Використовуємо простий rand() для швидкості генерації, або std::mt19937 для якості
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand();
     }
 
-    for (int i = 0; i < 5; i++)
-    {
-        cout << "Average execution time: " << b[i] << " milliseconds for Kruskal on Graph with |V| = " << a[i] << endl;
-        cout << endl;
-    }
-    
-    return 0;
+    std::cout << "Sorting started..." << std::endl;
+
+    Stats stats;
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // Виклик вашої функції
+    Top_DownMS(arr, n, stats);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff = end - start;
+
+    std::cout << "Done!\n";
+    std::cout << "Size: " << n << "\n";
+    std::cout << "Time: " << diff.count() << " seconds\n";
+    std::cout << "Comparisons: " << stats.comparisons << "\n";
+    std::cout << "Copies: " << stats.copies << "\n";
+    std::cout << "--------------------------------\n";
+
+    delete[] arr;
 }
 
+int main() 
+{
+    runTest(1000000);
+
+    runTest(10000000);
+
+    runTest(50000000);
+
+    return 0;
+}
 
 
 void push(Node_** headRef, int data) {

@@ -1,24 +1,67 @@
 #include "MergeSort.h"
 
-void Top_DownMS(int* x, int n)
+int* generateArray(int n, ArrayType type) {
+    int* arr = new int[n];
+    std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+
+    switch (type) 
+    {
+    case SORTED:
+        for (int i = 0; i < n; i++) arr[i] = i;
+        break;
+
+    case REVERSE_SORTED:
+        for (int i = 0; i < n; i++) arr[i] = n - 1 - i;
+        break;
+
+    case RANDOM: {
+        std::uniform_int_distribution<int> dist(0, n * 10);
+        for (int i = 0; i < n; i++) arr[i] = dist(rng);
+        break;
+    }
+    case ALMOST_SORTED:
+        for (int i = 0; i < n; i++) arr[i] = i;
+        {
+            std::uniform_int_distribution<int> distInd(0, n - 1);
+            int swaps = std::max(1, n / 100);
+            for (int k = 0; k < swaps; k++) 
+            {
+                std::swap(arr[distInd(rng)], arr[distInd(rng)]);
+            }
+        }
+        break;
+
+    case FEW_UNIQUE: 
+    {
+        std::uniform_int_distribution<int> distFew(0, 9);
+        for (int i = 0; i < n; i++) arr[i] = distFew(rng);
+        break;
+    }
+    }
+    return arr;
+}
+
+void Top_DownMS(int* x, int n, Stats& stats)
 {
     if (n == 1)
     {
         return;
     }
     int m = (n - (n >> 1));
+    stats.memory += (m * sizeof(int)) + ((n - m) * sizeof(int));
     int* y = new int[m];
     for (int i = 0; i < m; i++)
     {
         y[i] = x[i];
+        stats.copies++;
     }
-    Top_DownMS(y, m);
+    Top_DownMS(y, m, stats);
     int* y_ = new int[n - m];
     for (int i = 0; i < n - m; i++)
     {
         y_[i] = x[m + i];
     }
-    Top_DownMS(y_, n - m);
+    Top_DownMS(y_, n - m, stats);
 
     int i = 0;
     int j = 0;
@@ -26,6 +69,8 @@ void Top_DownMS(int* x, int n)
 
     while (i < m && j < n - m)
     {
+        stats.comparisons++;
+
         if (y[i] < y_[j])
         {
             x[k] = y[i];
@@ -36,6 +81,7 @@ void Top_DownMS(int* x, int n)
             x[k] = y_[j];
             j++;
         }
+        stats.copies++;
         k++;
     }
 
@@ -49,6 +95,7 @@ void Top_DownMS(int* x, int n)
     while (j < n - m)
     {
         x[k] = y_[j];
+        stats.copies++;
         j++;
         k++;
     }
@@ -172,7 +219,7 @@ void Bottom_UpMS(int* x, int n)
     delete[] a;
 }
 
-void Bottom_UpMS_withMods(int* x, int n)
+void Bottom_UpMS_withMods(int* x, int n, Stats& stats)
 {
     if (n < 11) //cutoff
     {
@@ -193,58 +240,68 @@ void Bottom_UpMS_withMods(int* x, int n)
     }
 
     int* a = new int[n]; // eliminate the copy to the auxiliary array
+    stats.memory += n * sizeof(int);
 
-    for (int i = 1; i < n; i *= 2)
+    int* src = x;   // Поточний масив для читання
+    int* dest = a; // Поточний масив для запису
+
+    for (int width = 1; width < n; width *= 2)
     {
-        for (int j = 0; j < n - i; j += (i << 1))
+        for (int i = 0; i < n; i += 2 * width)
         {
-            int m = i + j - 1;
-            int temp;
-            if ((j + 2 * i - 1) < n - 1)
-            {
-                temp = j + 2 * i - 1;
-            }
-            else
-            {
-                temp = n - 1;
-            }
+            int left = i;
+            int mid = std::min(i + width, n);
+            int right = std::min(i + 2 * width, n);
 
-            if (x[j] <= x[m+1]) //stop if sorted
-            {
-                continue;
-            }
-
-            for (int k = j; k <= temp; k++)
-            {
-                a[k] = x[k];
-            }
-
-            int i_ = j;
-            int j_ = m + 1;
-
-            for (int t = j; t <= temp; t++)
-            {
-                if (i_ > m)
-                {
-                    x[t] = a[j_];
-                    j_++;
-                }
-                else if (j_ > temp)
-                {
-                    x[t] = a[i_];
-                    i_++;
-                }
-                else if (a[j_] < a[i_])
-                {
-                    x[t] = a[j_];
-                    j_++;
-                }
-                else
-                {
-                    x[t] = a[i_];
-                    i_++;
+            if (mid < right) {
+                stats.comparisons++;
+                if (src[mid - 1] <= src[mid]) {
+                    // Вони вже в порядку! 
+                    // Але оскільки ми перемикаємо масиви, треба перенести дані в dest.
+                    // Це швидше, ніж злиття, бо немає if-else на кожен елемент.
+                    for (int k = left; k < right; k++) {
+                        dest[k] = src[k];
+                        stats.copies++;
+                    }
+                    continue; // Пропускаємо процес злиття
                 }
             }
+
+            // Стандартне злиття (Merge)
+            int l = left, r = mid, k = left;
+            while (l < mid && r < right) {
+                stats.comparisons++;
+                if (src[l] <= src[r]) {
+                    dest[k++] = src[l++];
+                }
+                else {
+                    dest[k++] = src[r++];
+                }
+                stats.copies++;
+            }
+            while (l < mid) {
+                dest[k++] = src[l++];
+                stats.copies++;
+            }
+            while (r < right) {
+                dest[k++] = src[r++];
+                stats.copies++;
+            }
+        }
+
+        // --- ВИМОГА 3: Eliminate the copy (частина 2) ---
+        // Замість копіювання dest назад у src, ми просто міняємо їх ролями.
+        // Тепер dest стає джерелом даних для наступної ітерації.
+        std::swap(src, dest);
+    }
+
+    // Фінальна перевірка:
+    // Якщо після останнього swap актуальні дані опинилися в aux (який зараз src),
+    // треба скопіювати їх у вихідний масив x.
+    if (src != x) {
+        for (int i = 0; i < n; i++) {
+            x[i] = src[i];
+            stats.copies++;
         }
     }
 
