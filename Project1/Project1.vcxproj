@@ -134,6 +134,7 @@
     <ClCompile Include="LUP.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Set.cpp" />
+    <ClCompile Include="Sorts.cpp" />
     <ClCompile Include="UnionFind.cpp" />
     <ClCompile Include="W_Or_Graphs.cpp" />
   </ItemGroup>
@@ -141,6 +142,7 @@
     <ClInclude Include="GraphList.h" />
     <ClInclude Include="GraphMat.h" />
     <ClInclude Include="LUP.h" />
+    <ClInclude Include="MergeSort.h" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="UnionFind.h" />
     <ClInclude Include="W_Or_Graphs.h" />

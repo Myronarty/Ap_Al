@@ -3,6 +3,7 @@
 #include "GraphList.h"
 #include "W_Or_Graphs.h"
 #include "LUP.h"
+#include "MergeSort.h"
 
 using Clock = std::chrono::steady_clock;
 using std::chrono::microseconds;
@@ -10,18 +11,7 @@ using std::chrono::duration_cast;
 
 int main() 
 {
-    double A[9] = {1, -3, 1, 3, -4, 1, 0, 2, -1};
-
-    double b[3] = {2, 0, 1};
-
-    double* x = rozviazok(A, b, 3);
-
-    for (int i = 0; i < 3; i++)
-    {
-        cout << x[i] << ", ";
-    }
-
-    /*long long total_duration_us = 0;
+    long long total_duration_us = 0;
     int a[5] = { 15, 50, 100, 200, 500 };
     double b[5] = { 0 };
 
@@ -50,6 +40,22 @@ int main()
         cout << "Average execution time: " << b[i] << " milliseconds for Kruskal on Graph with |V| = " << a[i] << endl;
         cout << endl;
     }
-    */
+    
     return 0;
+}
+
+
+
+void push(Node_** headRef, int data) {
+    Node_* newNode_ = new Node_(data);
+    newNode_->next = *headRef;
+    *headRef = newNode_;
+}
+
+void printList(Node_* Node_) {
+    while (Node_ != nullptr) {
+        std::cout << Node_->data << " -> ";
+        Node_ = Node_->next;
+    }
+    std::cout << "nullptr" << std::endl;
 }
