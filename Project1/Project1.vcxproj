@@ -133,6 +133,7 @@
     <ClCompile Include="GraphsMat.cpp" />
     <ClCompile Include="LUP.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Quick.cpp" />
     <ClCompile Include="Set.cpp" />
     <ClCompile Include="Sorts.cpp" />
     <ClCompile Include="UnionFind.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="GraphMat.h" />
     <ClInclude Include="LUP.h" />
     <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="QuickSort.h" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="UnionFind.h" />
     <ClInclude Include="W_Or_Graphs.h" />

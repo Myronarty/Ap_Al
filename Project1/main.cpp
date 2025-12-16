@@ -4,51 +4,66 @@
 #include "W_Or_Graphs.h"
 #include "LUP.h"
 #include "MergeSort.h"
+#include "QuickSort.h"
 
 using Clock = std::chrono::steady_clock;
 using std::chrono::microseconds;
 using std::chrono::duration_cast;
 
-void runTest(int n) {
+void runTest(int n, std::string name, SortFunction sortFunc, PivotStrategy opFunc) {
+    std::cout << "--------------------------------\n";
+    std::cout << "Algorithm: " << name << "\n";
     std::cout << "Generating array of size " << n << "..." << std::endl;
 
-    // Генеруємо масив
     int* arr = new int[n];
 
-    // Заповнюємо випадковими числами
-    // Використовуємо простий rand() для швидкості генерації, або std::mt19937 для якості
+    // Генерація (використовуємо mt19937, як у вашому прикладі)
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(0, n * 2);
+
     for (int i = 0; i < n; i++) {
-        arr[i] = rand();
+        arr[i] = distrib(gen);
     }
 
     std::cout << "Sorting started..." << std::endl;
 
-    Stats stats;
+    Stats_QS stats;
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Виклик вашої функції
-    Top_DownMS(arr, n, stats);
+    // Виклик переданої функції сортування
+    // Передаємо stats по посиланню
+    sortFunc(arr, 0, n - 1, opFunc, stats);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
 
     std::cout << "Done!\n";
     std::cout << "Size: " << n << "\n";
-    std::cout << "Time: " << diff.count() << " seconds\n";
+    std::cout << "Time: " << std::fixed << std::setprecision(5) << diff.count() << " seconds\n";
     std::cout << "Comparisons: " << stats.comparisons << "\n";
-    std::cout << "Copies: " << stats.copies << "\n";
-    std::cout << "--------------------------------\n";
+    std::cout << "Swaps: " << stats.swaps << "\n";
+    std::cout << "Copies (vars): " << stats.copies << "\n";
+
+    // Пам'ять (Heap + Stack estimate)
+    double heapMB = (double)(n * sizeof(int)) / (1024.0 * 1024.0);
+    std::cout << "Memory (Heap array): " << heapMB << " MB\n";
+    std::cout << "Memory (Stack recursion): ~O(log N)\n";
 
     delete[] arr;
 }
 
 int main() 
 {
-    runTest(1000000);
+    int N[3] = { 1000000, 10000000, 50000000 };
 
-    runTest(10000000);
-
-    runTest(50000000);
+    for (int i = 0; i < 3; i++)
+    {
+        runTest(N[i], "QS Lomuto (Rand Pivot)", QS_Lomuto, op_rand);
+        runTest(N[i], "QS Goar (Median Pivot)", QS_Goar, op_med);
+        runTest(N[i], "QS 3-Sides (MedRand Pivot)", three_sides, op_med_rand);
+        cout << i << " step over." << endl;
+    }
 
     return 0;
 }
